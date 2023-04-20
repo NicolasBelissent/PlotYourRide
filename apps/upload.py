@@ -13,7 +13,7 @@ def app():
     uploaded_files = []
 
     # define the function to handle file uploads
-    def upload_file():
+    def upload_files():
         files = st.file_uploader("Upload GPX files", type=["gpx"], accept_multiple_files=True)
         if files:
             for file in files:
