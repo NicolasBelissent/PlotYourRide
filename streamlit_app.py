@@ -10,7 +10,7 @@ st.set_page_config(page_title="Streamlit Geospatial", layout="wide")
 apps = [
     {"func": home.app, "title": "Home", "icon": "house"},
     {"func": visualise.app, "title": "Visualise your Ride", "icon": "map"},
-    {"func": upload.app, "title": "Upload your GPX files", "icon": "map"},
+    {"func": upload.app, "title": "Upload your GPX files", "icon": "map"}
 ]
 
 titles = [app["title"] for app in apps]
