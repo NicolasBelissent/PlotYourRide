@@ -1,5 +1,3 @@
-import os
-import geopandas as gpd
 import streamlit as st
 
 # create an empty list to hold the uploaded file data
@@ -7,10 +5,11 @@ uploaded_files = []
 
 # define the function to handle file uploads
 def upload_file():
-    file = st.file_uploader("Upload GPX file", type=["gpx"])
-    if file is not None:
-        uploaded_files.append(file)
-        st.success("File uploaded successfully.")
+    files = st.file_uploader("Upload GPX files", type=["gpx"], accept_multiple_files=True)
+    if files:
+        for file in files:
+            uploaded_files.append(file)
+        st.success(f"{len(files)} file(s) uploaded successfully.")
 
 # call the upload_file function on the app's home page
 upload_file()
