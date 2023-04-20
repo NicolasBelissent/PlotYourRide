@@ -1,6 +1,6 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-from apps import home, visualise, upload  # import your app modules here
+from apps import home, visualise  # import your app modules here
 
 st.set_page_config(page_title="Streamlit Geospatial", layout="wide")
 
@@ -9,9 +9,7 @@ st.set_page_config(page_title="Streamlit Geospatial", layout="wide")
 
 apps = [
     {"func": home.app, "title": "Home", "icon": "house"},
-    {"func": visualise.app, "title": "Visualise your Ride", "icon": "map"},
-    {"func": upload.app, "title": "Upload your GPX files", "icon": "map"}
-]
+    {"func": visualise.app, "title": "Visualise your Ride", "icon": "map"}]
 
 titles = [app["title"] for app in apps]
 titles_lower = [title.lower() for title in titles]
