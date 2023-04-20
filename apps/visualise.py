@@ -19,9 +19,6 @@ def app():
     """
     )
 
-
-    import streamlit as st
-
     # define the function to handle file uploads
     def upload_file():
         uploaded_files = st.file_uploader("Upload GPX files", type=["gpx"], accept_multiple_files=True)
