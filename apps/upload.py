@@ -27,4 +27,4 @@ def app():
     if uploaded_files:
         st.sidebar.header("Uploaded Files")
         for file in uploaded_files:
-            st.sidebar.markdown(f"[{file.name}]({file.url})", unsafe_allow_html=True)
+            st.sidebar.markdown(f"[{file.name}]", unsafe_allow_html=True)
