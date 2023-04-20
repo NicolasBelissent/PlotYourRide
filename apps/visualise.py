@@ -5,7 +5,7 @@ import folium
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from upload_files import upload_file
+from upload import upload_files
 
 
 
@@ -21,7 +21,7 @@ def app():
     )
 
 
-    selected_files = upload_file()
+    selected_files = upload_files()
 
     if selected_files:
         st.write("Selected files:")
