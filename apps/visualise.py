@@ -5,6 +5,7 @@ import folium
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+from upload_files import upload_file
 
 
 
@@ -19,20 +20,11 @@ def app():
     """
     )
 
-    # define the function to visualize the selected files
-    def visualize_files(selected_files):
-        dfs = []
-        for file in selected_files:
-            contents = st.session_state[file]
-            if contents:
-                df = pd.read_xml(contents, xpath=".//trkpt")
-                dfs.append(df)
-        if dfs:
-            data = pd.concat(dfs)
-            st.dataframe(data)
-        else:
-            st.write("No files selected.")
-    # get access to the uploaded gpx files 
-    selected_files = st.session_state.selected_files
-    visualize_files(selected_files)
+
+    selected_files = upload_file()
+
+    if selected_files:
+        st.write("Selected files:")
+        for name, file in selected_files.items():
+            st.write(name)
 
