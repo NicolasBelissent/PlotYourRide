@@ -21,7 +21,7 @@ def app():
             st.success(f"{len(files)} file(s) uploaded successfully.")
 
     # call the upload_file function on the app's home page
-    upload_file()
+    selected_files  = upload_file()
 
     # display a link to the uploaded file(s) on all pages
     if uploaded_files:
