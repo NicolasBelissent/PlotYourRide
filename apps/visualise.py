@@ -103,7 +103,7 @@ def combine_gpx_files(gpx_files):
 #     return output
 
 def visualise_gpx(the_map, filename, segment_name = 'Bike Ride', tile = 'stamenterrain'):
-
+    st.write(type(filename))
     for track in filename:
         for _, segment in enumerate(track['segments']):
             add_segment_to_map(the_map, segment,
@@ -214,7 +214,7 @@ def app():
                         st.code(type(gpx_data))
 
                         # Pass the file contents through the visualise_gpx() function
-                        visualise_gpx(folium_map,gpx_data)
+                        visualise_gpx(folium_map,list(gpx_data))
         with col3:
             # Add a button to download a PDF of the map
             if st.button("Get Trip Statistics"):
