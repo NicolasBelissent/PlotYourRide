@@ -158,41 +158,40 @@ def app():
         # Combine the GPX files into a single file
         combined_file = combine_gpx_files(uploaded_files)
 
-        # Create a row to contain the buttons
-        row = st.row()
+        col1, col2, col3, col4 = st.columns([1,1,1,1])
 
-        # Display a download button that allows the user to download the combined file
-        row.download_button(
+        with col1:
+            st.download_button(
             label="Download Combined GPX File",
             data=combined_file.getvalue(),
             file_name="combined.gpx",
-            mime="application/gpx+xml"
-        )
+            mime="application/gpx+xml")
 
-        # Add the other two buttons to the row
-        if row.button("Visualise your Trip"):
-            # Loop through each uploaded file and visualize it
-            for uploaded_file in uploaded_files:
-                if uploaded_file is not None:
-                    
-                    folium_map = create_folium_map()
+        with col2:
+            # Add the other two buttons to the row
+            if st.button("Visualise your Trip"):
+                # Loop through each uploaded file and visualize it
+                for uploaded_file in uploaded_files:
+                    if uploaded_file is not None:
+                        
+                        folium_map = create_folium_map()
 
-                    # Read the contents of the file
-                    file_contents = uploaded_file.read()
+                        # Read the contents of the file
+                        file_contents = uploaded_file.read()
 
-                    # Pass the file contents through the visualise_gpx() function
-                    visualise_gpx(file_contents)
+                        # Pass the file contents through the visualise_gpx() function
+                        visualise_gpx(file_contents)
+        with col3:
+            # Add a button to download a PDF of the map
+            st.text('...')
 
-        if row.button("Get Trip Statistics"):
-            print('none')
-        # Add a button to download a PDF of the map
-        if row.button("Download Map PDF"):
+        with col4:
 
-            if folium_map is not None:
-                # Convert the Folium map to HTML
-                map_html = folium_map._repr_html_()
-                download_map_pdf(map_html)
-            else:
-                st.text('Please visualise before downloading PDF')
+            if st.button("Download Map PDF"):
 
-            download_map_pdf()
+                if folium_map is not None:
+                    # Convert the Folium map to HTML
+                    map_html = folium_map._repr_html_()
+                    download_map_pdf(map_html)
+                else:
+                    st.text('Please visualise before downloading PDF')
