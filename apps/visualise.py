@@ -63,7 +63,12 @@ def combine_gpx_files(gpx_files):
         for track in gpx_file.tracks:
             combined_gpx.tracks.append(track)
     
-    return combined_gpx.to_xml()
+    combined_xml = combined_gpx.to_xml()
+    file_name = "combined.gpx"
+    with open(file_name, "w") as f:
+        f.write(combined_xml)
+    
+    return combined_xml
 
 # def combine_gpx_files(files):
 #     # Create a new GPX file
@@ -191,7 +196,7 @@ def app():
 
             st.download_button(
             label="Download Combined GPX File",
-            data=combined_file.getvalue(),
+            data=combined_file,
             file_name="combined.gpx",
             mime="application/gpx+xml")
 
