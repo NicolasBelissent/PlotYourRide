@@ -16,5 +16,4 @@ altair
 gpxplotter
 selenium
 pdfkit
-streamlit==0.75.0
 altair_saver
