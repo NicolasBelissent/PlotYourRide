@@ -177,6 +177,8 @@ def app():
                         
                         # Read the contents of the file
                         file_contents = uploaded_file.read()
+                        print(file_contents)
+                        print(type(file_contents))
 
                         # Pass the file contents through the visualise_gpx() function
                         visualise_gpx(folium_map,file_contents)
