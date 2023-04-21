@@ -12,3 +12,4 @@ streamlit-folium
 mapclassify
 matplotlib
 folium
+xml
