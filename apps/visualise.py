@@ -55,37 +55,47 @@ def download_map_pdf(map_html):
         )
     os.remove(pdf_file_name)
 
-def combine_gpx_files(files):
-    # Create a new GPX file
-    combined_gpx = ET.Element("gpx", xmlns="http://www.topografix.com/GPX/1/1")
+def combine_gpx_files(gpx_files):
+    combined_gpx = gpxpy.gpx.GPX()
 
-    # Iterate over all the input GPX files
-    for file in files:
-        # Parse the GPX file
-        tree = ET.parse(file)
-        root = tree.getroot()
+    for gpx_file in gpx_files:
+        gpx = gpxpy.parse(gpx_file)
+        for track in gpx.tracks:
+            combined_gpx.tracks.append(track)
+    
+    return combined_gpx.to_xml()
 
-        # Iterate over all the waypoints, tracks, and routes in the GPX file
-        for element in root:
-            if element.tag == "wpt":
-                # Add the waypoint to the combined GPX file
-                combined_gpx.append(element)
-            elif element.tag == "trk":
-                # Iterate over all the track segments in the track
-                for segment in element:
-                    # Add the track segment to the combined GPX file
-                    combined_gpx.append(segment)
-            elif element.tag == "rte":
-                # Add the route to the combined GPX file
-                combined_gpx.append(element)
+# def combine_gpx_files(files):
+#     # Create a new GPX file
+#     combined_gpx = ET.Element("gpx", xmlns="http://www.topografix.com/GPX/1/1")
 
-    # Create a file-like object in memory to write the GPX file to
-    output = BytesIO()
-    ET.ElementTree(combined_gpx).write(output, encoding="UTF-8", xml_declaration=True)
-    output.seek(0)
+#     # Iterate over all the input GPX files
+#     for file in files:
+#         # Parse the GPX file
+#         tree = ET.parse(file)
+#         root = tree.getroot()
 
-    # Return the file-like object
-    return output
+#         # Iterate over all the waypoints, tracks, and routes in the GPX file
+#         for element in root:
+#             if element.tag == "wpt":
+#                 # Add the waypoint to the combined GPX file
+#                 combined_gpx.append(element)
+#             elif element.tag == "trk":
+#                 # Iterate over all the track segments in the track
+#                 for segment in element:
+#                     # Add the track segment to the combined GPX file
+#                     combined_gpx.append(segment)
+#             elif element.tag == "rte":
+#                 # Add the route to the combined GPX file
+#                 combined_gpx.append(element)
+
+#     # Create a file-like object in memory to write the GPX file to
+#     output = BytesIO()
+#     ET.ElementTree(combined_gpx).write(output, encoding="UTF-8", xml_declaration=True)
+#     output.seek(0)
+
+#     # Return the file-like object
+#     return output
 
 def visualise_gpx(the_map, filename, segment_name = 'Bike Ride', tile = 'stamenterrain'):
 
