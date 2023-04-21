@@ -19,8 +19,9 @@ import pdfkit
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import time
+import os
 
-def download_map_pdf():
+def download_map_pdf(map_html):
     # Set up Selenium
     options = Options()
     options.add_argument("--headless")
@@ -190,7 +191,8 @@ def app():
             if folium_map is not None:
                 # Convert the Folium map to HTML
                 map_html = folium_map._repr_html_()
+                download_map_pdf(map_html)
             else:
-                st.text('Please ')
+                st.text('Please visualise before downloading PDF')
 
             download_map_pdf()

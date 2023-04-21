@@ -14,6 +14,5 @@ matplotlib
 folium
 altair
 gpxplotter
-io
 selenium
 pdfkit
