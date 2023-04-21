@@ -59,8 +59,8 @@ def combine_gpx_files(gpx_files):
     combined_gpx = gpxpy.gpx.GPX()
 
     for gpx_file in gpx_files:
-        gpx = gpxpy.parse(gpx_file)
-        for track in gpx.tracks:
+        #gpx = gpxpy.parse(gpx_file)
+        for track in gpx_file.tracks:
             combined_gpx.tracks.append(track)
     
     return combined_gpx.to_xml()
