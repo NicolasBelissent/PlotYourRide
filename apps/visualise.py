@@ -88,7 +88,7 @@ def combine_gpx_files(files):
 
 def visualise_gpx(the_map, filename, segment_name = 'Bike Ride', tile = 'stamenterrain'):
 
-    for track in read_gpx_file(filename):
+    for track in filename:
         for _, segment in enumerate(track['segments']):
             add_segment_to_map(the_map, segment,
                             cmap='viridis', line_options={'weight': 8})
@@ -176,12 +176,12 @@ def app():
                     if uploaded_file is not None:
                         
                         # Read the contents of the file
-                        file_contents = read_gpx_file(uploaded_file)
-                        st.code(file_contents)
-                        st.code(type(file_contents))
+                        gpx_data = read_gpx_file(uploaded_file)
+                        st.code(gpx_data)
+                        st.code(type(gpx_data))
 
                         # Pass the file contents through the visualise_gpx() function
-                        visualise_gpx(folium_map,file_contents)
+                        visualise_gpx(folium_map,gpx_data)
         with col3:
             # Add a button to download a PDF of the map
             if st.button("Get Trip Statistics"):
