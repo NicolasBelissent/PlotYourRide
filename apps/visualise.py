@@ -19,6 +19,7 @@ import pdfkit
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import time
+import gpxpy
 import os
 
 def download_map_pdf(map_html):
@@ -146,6 +147,21 @@ def visualise_gpx(the_map, filename, segment_name = 'Bike Ride', tile = 'stament
     marker.add_to(the_map)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Create a Streamlit app that allows the user to upload GPX files and download the combined file
 def app():
     st.title("Visualise your Ride")
@@ -156,11 +172,13 @@ def app():
     # If the user has uploaded files, combine them into a single file and allow the user to download it
     if uploaded_files:
         # Combine the GPX files into a single file
-        combined_file = combine_gpx_files(uploaded_files)
+        gpx_files = [gpxpy.parse(file) for file in uploaded_files]
 
         col1, col2, col3, col4 = st.columns([1,1,1,1])
 
         with col1:
+            combined_file = combine_gpx_files(gpx_files)
+
             st.download_button(
             label="Download Combined GPX File",
             data=combined_file.getvalue(),
@@ -172,11 +190,11 @@ def app():
             if st.button("Visualise your Trip"):
                 folium_map = create_folium_map()
                 # Loop through each uploaded file and visualize it
-                for uploaded_file in uploaded_files:
-                    if uploaded_file is not None:
+                for gpx_file in gpx_files:
+                    if gpx_file is not None:
                         
                         # Read the contents of the file
-                        gpx_data = read_gpx_file(uploaded_file)
+                        gpx_data = read_gpx_file(gpx_file)
                         st.code(gpx_data)
                         st.code(type(gpx_data))
 
