@@ -91,7 +91,7 @@ def visualise_gpx(the_map, filename, segment_name = 'Bike Ride', tile = 'stament
     for track in read_gpx_file(filename):
         for i, segment in enumerate(track['segments']):
             add_segment_to_map(the_map, segment,
-                            cmap='viridis', line_options=line_options)
+                            cmap='viridis', line_options={'weight': 8})
 
     # Create a chart using Altair
     idx = len(segment['elevation'])
@@ -170,20 +170,20 @@ def app():
         with col2:
             # Add the other two buttons to the row
             if st.button("Visualise your Trip"):
+                folium_map = create_folium_map()
                 # Loop through each uploaded file and visualize it
                 for uploaded_file in uploaded_files:
                     if uploaded_file is not None:
                         
-                        folium_map = create_folium_map()
-
                         # Read the contents of the file
                         file_contents = uploaded_file.read()
 
                         # Pass the file contents through the visualise_gpx() function
-                        visualise_gpx(file_contents)
+                        visualise_gpx(folium_map,file_contents)
         with col3:
             # Add a button to download a PDF of the map
-            st.text('...')
+            if st.button("Get Trip Statistics"):
+                st.text('...')
 
         with col4:
 
