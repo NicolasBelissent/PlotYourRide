@@ -88,7 +88,7 @@ def combine_gpx_files(files):
 
 def visualise_gpx(the_map, filename, segment_name = 'Bike Ride', tile = 'stamenterrain'):
 
-    for track in filename:
+    for track in read_gpx_file(filename):
         for _, segment in enumerate(track['segments']):
             add_segment_to_map(the_map, segment,
                             cmap='viridis', line_options={'weight': 8})
