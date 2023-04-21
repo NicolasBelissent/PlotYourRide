@@ -12,3 +12,8 @@ streamlit-folium
 mapclassify
 matplotlib
 folium
+altair
+gpxplotter
+io
+selenium
+pdfkit

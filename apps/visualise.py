@@ -5,36 +5,53 @@ import folium
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-
-
-# # define the function to handle file uploads
-# def upload_file():
-#     uploaded_files = st.file_uploader("Upload GPX files", type=["gpx"], accept_multiple_files=True)
-#     if uploaded_files:
-#         # create a dictionary of file names and their respective file paths
-#         selected_files = {}
-#         for file in uploaded_files:
-#             if st.checkbox(file.name):
-#                 file_contents = file.read()
-#                 selected_files[file.name] = file_contents
-#         return selected_files
-
-# def app():
-
-#     st.title("Visualise your Ride")
-
-#     # set the app instructions
-#     st.write("Upload GPX files and select which files to use for visualization.")
-
-#     # call the upload_file function to handle file uploads
-#     selected_files = upload_file()
-#     if selected_files:
-#         st.write(f"You have selected {len(selected_files)} files for visualization.")
-#         st.write(selected_files)
-
-import streamlit as st
 import xml.etree.ElementTree as ET
 from io import BytesIO
+import altair as alt
+import json
+import folium
+from gpxplotter import create_folium_map, read_gpx_file, add_segment_to_map
+import gpxplotter
+import numpy as np
+from altair_saver import save
+import pandas as pd
+import pdfkit
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+import time
+
+def download_map_pdf():
+    # Set up Selenium
+    options = Options()
+    options.add_argument("--headless")
+    driver = webdriver.Chrome(options=options)
+
+    # Create a temporary HTML file containing the map
+    tmp_map_file = "tmp_map.html"
+    with open(tmp_map_file, "w") as f:
+        f.write(map_html)
+
+    # Wait for the map to fully render
+    time.sleep(5)
+
+    # Use pdfkit to create a PDF of the map
+    pdf_file_name = "map.pdf"
+    pdfkit.from_file(tmp_map_file, pdf_file_name)
+
+    # Close the Selenium driver and delete the temporary files
+    driver.quit()
+    os.remove(tmp_map_file)
+
+    # Download the PDF file
+    with open(pdf_file_name, "rb") as f:
+        pdf_bytes = f.read()
+        st.download_button(
+            label="Download Map PDF",
+            data=pdf_bytes,
+            file_name=pdf_file_name,
+            mime="application/pdf"
+        )
+    os.remove(pdf_file_name)
 
 def combine_gpx_files(files):
     # Create a new GPX file
@@ -68,6 +85,66 @@ def combine_gpx_files(files):
     # Return the file-like object
     return output
 
+def visualise_gpx(the_map, filename, segment_name = 'Bike Ride', tile = 'stamenterrain'):
+
+    for track in read_gpx_file(filename):
+        for i, segment in enumerate(track['segments']):
+            add_segment_to_map(the_map, segment,
+                            cmap='viridis', line_options=line_options)
+
+    # Create a chart using Altair
+    idx = len(segment['elevation'])
+
+    data = {
+        'x': segment['Distance / km'],
+        'y': segment['elevation'],
+    }
+    # Convert the data to a Pandas DataFrame
+    df = pd.DataFrame(data)
+
+    # Specify the data type for the x encoding field
+    line = alt.Chart(df).mark_line().encode(
+        x=alt.X('x', title='Distance / km'),
+        y=alt.Y('y', title='Elevation / m')
+    )
+
+    WIDTH = 400
+    HEIGHT = 200
+
+    line = line.properties(
+        width=WIDTH,
+        height=HEIGHT
+    )
+
+    # Save the chart as a PNG image
+    #png_bytes = save(line, format='png')
+    line.save('test.html')
+    # Encode the PNG image as base64 string
+    chart_html = open("test.html", "r").read()
+    # Create the HTML content for the popup
+    html = ''' <h1 style="font-family: Verdana"> {0}</h1><br>
+            <p style="font-family: Verdana"> Distance: {1} </p>
+            <p style="font-family: Verdana"> Total elevation Gain: {2} </p>
+            <p style="font-family: Verdana"> Average Speed: {3} </p>
+            <img src="data:image/png;base64,{4}" />
+
+            <br>
+            {4}
+            '''.format(segment_name,str(np.round(segment['distance'][-1]/1000,2))+' km', str(np.round(segment['elevation-up'], 1)) +' m', str(np.round(np.mean(segment['Velocity / km/h']), 1)) + ' km/h', chart_html)
+
+    iframe = folium.IFrame(html=html, width=500, height=500)
+    popup = folium.Popup(iframe, width=500, height=500)
+
+    folium.TileLayer(tile).add_to(the_map)
+
+    marker = folium.Marker(
+        location=segment['latlon'][idx],
+        popup=popup,
+        icon=folium.Icon(icon='star'),
+    )
+    marker.add_to(the_map)
+
+
 # Create a Streamlit app that allows the user to upload GPX files and download the combined file
 def app():
     st.title("Visualise your Ride")
@@ -80,10 +157,40 @@ def app():
         # Combine the GPX files into a single file
         combined_file = combine_gpx_files(uploaded_files)
 
+        # Create a row to contain the buttons
+        row = st.row()
+
         # Display a download button that allows the user to download the combined file
-        st.download_button(
+        row.download_button(
             label="Download Combined GPX File",
             data=combined_file.getvalue(),
             file_name="combined.gpx",
             mime="application/gpx+xml"
         )
+
+        # Add the other two buttons to the row
+        if row.button("Visualise your Trip"):
+            # Loop through each uploaded file and visualize it
+            for uploaded_file in uploaded_files:
+                if uploaded_file is not None:
+                    
+                    folium_map = create_folium_map()
+
+                    # Read the contents of the file
+                    file_contents = uploaded_file.read()
+
+                    # Pass the file contents through the visualise_gpx() function
+                    visualise_gpx(file_contents)
+
+        if row.button("Get Trip Statistics"):
+            print('none')
+        # Add a button to download a PDF of the map
+        if row.button("Download Map PDF"):
+
+            if folium_map is not None:
+                # Convert the Folium map to HTML
+                map_html = folium_map._repr_html_()
+            else:
+                st.text('Please ')
+
+            download_map_pdf()
