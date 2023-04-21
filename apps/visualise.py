@@ -104,7 +104,7 @@ def combine_gpx_files(gpx_files):
 
 def visualise_gpx(the_map, filename, segment_name = 'Bike Ride', tile = 'stamenterrain'):
     st.write(type(filename))
-    for track in filename:
+    for track in filename.tracks:
         for _, segment in enumerate(track['segments']):
             add_segment_to_map(the_map, segment,
                             cmap='viridis', line_options={'weight': 8})
@@ -224,9 +224,8 @@ def app():
 
             if st.button("Download Map PDF"):
 
-                if folium_map is not None:
-                    # Convert the Folium map to HTML
+                try:
                     map_html = folium_map._repr_html_()
                     download_map_pdf(map_html)
-                else:
+                except NameError:
                     st.text('Please visualise before downloading PDF')
