@@ -18,3 +18,4 @@ pdfkit
 altair_saver
 gpxpy
 numpy
+pip == 23.1.1
