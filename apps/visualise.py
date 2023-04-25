@@ -102,90 +102,85 @@ def combine_gpx_files(gpx_files):
 #     # Return the file-like object
 #     return output
 
+
 def visualise_gpx(the_map, filename, segment_name = 'Bike Ride', tile = 'stamenterrain'):
-       # Create empty GeoDataFrame
-    track = gpd.GeoDataFrame(columns=['name', 'geometry'], geometry='geometry')     
-    try:
-        gdf = gpd.read_file(filename, layer='tracks')
-        track = track.append(gdf[['name', 'geometry']])
-    except:
-        print("Error", filename)
-    
-    track.explore
+    st.write(type(filename))
+    for track in filename.tracks:
+        for _, segment in enumerate(track['segments']):
+            add_segment_to_map(the_map, segment,
+                            cmap='viridis', line_options={'weight': 8})
 
-# def visualise_gpx(the_map, filename, segment_name = 'Bike Ride', tile = 'stamenterrain'):
-#     st.write(type(filename))
-#     for track in filename.tracks:
-#         for _, segment in enumerate(track['segments']):
-#             add_segment_to_map(the_map, segment,
-#                             cmap='viridis', line_options={'weight': 8})
+    # Create a chart using Altair
+    idx = len(segment['elevation'])
 
-#     # Create a chart using Altair
-#     idx = len(segment['elevation'])
+    data = {
+        'x': segment['Distance / km'],
+        'y': segment['elevation'],
+    }
+    # Convert the data to a Pandas DataFrame
+    df = pd.DataFrame(data)
 
-#     data = {
-#         'x': segment['Distance / km'],
-#         'y': segment['elevation'],
-#     }
-#     # Convert the data to a Pandas DataFrame
-#     df = pd.DataFrame(data)
+    # Specify the data type for the x encoding field
+    line = alt.Chart(df).mark_line().encode(
+        x=alt.X('x', title='Distance / km'),
+        y=alt.Y('y', title='Elevation / m')
+    )
 
-#     # Specify the data type for the x encoding field
-#     line = alt.Chart(df).mark_line().encode(
-#         x=alt.X('x', title='Distance / km'),
-#         y=alt.Y('y', title='Elevation / m')
-#     )
+    WIDTH = 400
+    HEIGHT = 200
 
-#     WIDTH = 400
-#     HEIGHT = 200
+    line = line.properties(
+        width=WIDTH,
+        height=HEIGHT
+    )
 
-#     line = line.properties(
-#         width=WIDTH,
-#         height=HEIGHT
-#     )
+    # Save the chart as a PNG image
+    #png_bytes = save(line, format='png')
+    line.save('test.html')
+    # Encode the PNG image as base64 string
+    chart_html = open("test.html", "r").read()
+    # Create the HTML content for the popup
+    html = ''' <h1 style="font-family: Verdana"> {0}</h1><br>
+            <p style="font-family: Verdana"> Distance: {1} </p>
+            <p style="font-family: Verdana"> Total elevation Gain: {2} </p>
+            <p style="font-family: Verdana"> Average Speed: {3} </p>
+            <img src="data:image/png;base64,{4}" />
 
-#     # Save the chart as a PNG image
-#     #png_bytes = save(line, format='png')
-#     line.save('test.html')
-#     # Encode the PNG image as base64 string
-#     chart_html = open("test.html", "r").read()
-#     # Create the HTML content for the popup
-#     html = ''' <h1 style="font-family: Verdana"> {0}</h1><br>
-#             <p style="font-family: Verdana"> Distance: {1} </p>
-#             <p style="font-family: Verdana"> Total elevation Gain: {2} </p>
-#             <p style="font-family: Verdana"> Average Speed: {3} </p>
-#             <img src="data:image/png;base64,{4}" />
+            <br>
+            {4}
+            '''.format(segment_name,str(np.round(segment['distance'][-1]/1000,2))+' km', str(np.round(segment['elevation-up'], 1)) +' m', str(np.round(np.mean(segment['Velocity / km/h']), 1)) + ' km/h', chart_html)
 
-#             <br>
-#             {4}
-#             '''.format(segment_name,str(np.round(segment['distance'][-1]/1000,2))+' km', str(np.round(segment['elevation-up'], 1)) +' m', str(np.round(np.mean(segment['Velocity / km/h']), 1)) + ' km/h', chart_html)
+    iframe = folium.IFrame(html=html, width=500, height=500)
+    popup = folium.Popup(iframe, width=500, height=500)
 
-#     iframe = folium.IFrame(html=html, width=500, height=500)
-#     popup = folium.Popup(iframe, width=500, height=500)
+    folium.TileLayer(tile).add_to(the_map)
 
-#     folium.TileLayer(tile).add_to(the_map)
+    marker = folium.Marker(
+        location=segment['latlon'][idx],
+        popup=popup,
+        icon=folium.Icon(icon='star'),
+    )
+    marker.add_to(the_map)
 
-#     marker = folium.Marker(
-#         location=segment['latlon'][idx],
-#         popup=popup,
-#         icon=folium.Icon(icon='star'),
-#     )
-#     marker.add_to(the_map)
+def get_trip_statistics(files):
 
+    # define metrics to expose
+    total_distance = 0
+    total_elevation = 0
+    average_speed = 0
+    num_days = len(files)
+    for file in files:
+        for track in read_gpx_file(file):
+            segment = track['segments'][0] # this assumes that there is only one segment
+            total_distance += segment['distance'][-1]/1000
+            total_elevation += segment['elevation-up']
+            average_speed += np.mean(segment['Velocity / km/h'])
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    metrics_dict = {
+        'Total Distance (km)':np.round(total_distance,2),
+        'Total Elevation (m)':np.round(total_elevation,1),
+        'Average Speed (km/h)':np.round(average_speed/num_days,1)}
+    return metrics_dict
 
 
 # Create a Streamlit app that allows the user to upload GPX files and download the combined file
@@ -228,8 +223,8 @@ def app():
                         visualise_gpx(folium_map,gpx_data)
         with col3:
             # Add a button to download a PDF of the map
-            if st.button("Get Trip Statistics"):
-                st.text('...')
+            if st.button("Get Trip Statistics"):                
+                get_trip_statistics(gpx_files)
 
         with col4:
 
