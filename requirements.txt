@@ -17,3 +17,4 @@ selenium
 pdfkit
 altair_saver
 gpxpy
+numpy
