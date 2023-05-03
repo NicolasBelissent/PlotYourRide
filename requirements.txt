@@ -17,3 +17,4 @@ gpxplotter
 selenium
 pdfkit
 altair_saver
+gpxpy
