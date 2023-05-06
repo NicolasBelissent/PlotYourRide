@@ -136,8 +136,8 @@ def visualise_gpx(the_map, filename, segment_name = 'Bike Ride', tile = 'stament
             html='<div style="font-size: 18pt">{}</div>'.format(str(track['name'])[2:-2])),
         )
         marker.add_to(the_map)
+    return the_map
 
-        return the_map
 
 
 def get_trip_statistics(files):
@@ -199,8 +199,7 @@ def app():
                         st.code(type(gpx_data))
 
                         # Pass the file contents through the visualise_gpx() function
-                        visualise_gpx(folium_map,'data/day_1.gpx')
-
+                        visualise_gpx(folium_map,'data/day_1.gpx') ## need to work out how to use downloaded file on ui...
                 show_map = st_folium(folium_map, width=800, height=400)
                         
                       
