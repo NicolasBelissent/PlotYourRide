@@ -1,7 +1,8 @@
 import streamlit as st
 import leafmap.foliumap as leafmap
-from streamlit_folium import folium_static
+from streamlit_folium import folium_static, st_folium
 import folium
+from folium.features import DivIcon
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -21,6 +22,8 @@ from selenium.webdriver.chrome.options import Options
 import time
 import gpxpy
 import os
+
+line_options = {'weight': 8}
 
 def download_map_pdf(map_html):
     # Set up Selenium
@@ -134,7 +137,9 @@ def visualise_gpx(the_map, filename, segment_name = 'Bike Ride', tile = 'stament
         )
         marker.add_to(the_map)
 
-        
+        return the_map
+
+
 def get_trip_statistics(files):
 
     # define metrics to expose
@@ -184,6 +189,7 @@ def app():
             if st.button("Visualise your Trip"):
                 folium_map = create_folium_map()
                 # Loop through each uploaded file and visualize it
+
                 for gpx_file in gpx_files:
                     if gpx_file is not None:
                         
@@ -193,7 +199,11 @@ def app():
                         st.code(type(gpx_data))
 
                         # Pass the file contents through the visualise_gpx() function
-                        visualise_gpx(folium_map,gpx_data)
+                        visualise_gpx(folium_map,'data/day_1.gpx')
+
+                show_map = st_folium(folium_map, width=800, height=400)
+                        
+                      
         with col3:
             # Add a button to download a PDF of the map
             if st.button("Get Trip Statistics"):                
