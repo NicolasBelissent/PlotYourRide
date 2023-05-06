@@ -70,98 +70,71 @@ def combine_gpx_files(gpx_files):
     
     return combined_xml
 
-# def combine_gpx_files(files):
-#     # Create a new GPX file
-#     combined_gpx = ET.Element("gpx", xmlns="http://www.topografix.com/GPX/1/1")
-
-#     # Iterate over all the input GPX files
-#     for file in files:
-#         # Parse the GPX file
-#         tree = ET.parse(file)
-#         root = tree.getroot()
-
-#         # Iterate over all the waypoints, tracks, and routes in the GPX file
-#         for element in root:
-#             if element.tag == "wpt":
-#                 # Add the waypoint to the combined GPX file
-#                 combined_gpx.append(element)
-#             elif element.tag == "trk":
-#                 # Iterate over all the track segments in the track
-#                 for segment in element:
-#                     # Add the track segment to the combined GPX file
-#                     combined_gpx.append(segment)
-#             elif element.tag == "rte":
-#                 # Add the route to the combined GPX file
-#                 combined_gpx.append(element)
-
-#     # Create a file-like object in memory to write the GPX file to
-#     output = BytesIO()
-#     ET.ElementTree(combined_gpx).write(output, encoding="UTF-8", xml_declaration=True)
-#     output.seek(0)
-
-#     # Return the file-like object
-#     return output
-
 
 def visualise_gpx(the_map, filename, segment_name = 'Bike Ride', tile = 'stamenterrain'):
-    st.write(type(filename))
-    for track in filename.tracks:
-        for _, segment in enumerate(track['segments']):
+
+    for track in read_gpx_file(filename):
+        #print(track)
+        for i, segment in enumerate(track['segments']):
             add_segment_to_map(the_map, segment,
-                            cmap='viridis', line_options={'weight': 8})
+                            cmap='viridis', line_options=line_options)
 
-    # Create a chart using Altair
-    idx = len(segment['elevation'])
+        # Create a chart using Altair
+        idx = len(segment['elevation'])
 
-    data = {
-        'x': segment['Distance / km'],
-        'y': segment['elevation'],
-    }
-    # Convert the data to a Pandas DataFrame
-    df = pd.DataFrame(data)
+        data = {
+            'x': segment['Distance / km'],
+            'y': segment['elevation'],
+        }
+        # Convert the data to a Pandas DataFrame
+        df = pd.DataFrame(data)
 
-    # Specify the data type for the x encoding field
-    line = alt.Chart(df).mark_line().encode(
-        x=alt.X('x', title='Distance / km'),
-        y=alt.Y('y', title='Elevation / m')
-    )
+        # Specify the data type for the x encoding field
+        line = alt.Chart(df).mark_line().encode(
+            x=alt.X('x', title='Distance / km'),
+            y=alt.Y('y', title='Elevation / m')
+        )
 
-    WIDTH = 400
-    HEIGHT = 200
+        WIDTH = 400
+        HEIGHT = 200
 
-    line = line.properties(
-        width=WIDTH,
-        height=HEIGHT
-    )
+        line = line.properties(
+            width=WIDTH,
+            height=HEIGHT
+        )
 
-    # Save the chart as a PNG image
-    #png_bytes = save(line, format='png')
-    line.save('test.html')
-    # Encode the PNG image as base64 string
-    chart_html = open("test.html", "r").read()
-    # Create the HTML content for the popup
-    html = ''' <h1 style="font-family: Verdana"> {0}</h1><br>
-            <p style="font-family: Verdana"> Distance: {1} </p>
-            <p style="font-family: Verdana"> Total elevation Gain: {2} </p>
-            <p style="font-family: Verdana"> Average Speed: {3} </p>
-            <img src="data:image/png;base64,{4}" />
+        # Save the chart as a PNG image
+        #png_bytes = save(line, format='png')
+        line.save('test.html')
+        # Encode the PNG image as base64 string
+        chart_html = open("test.html", "r").read()
+        # Create the HTML content for the popup
+        html = ''' <h1 style="font-family: Verdana"> {0}</h1><br>
+                <p style="font-family: Verdana"> Distance: {1} </p>
+                <p style="font-family: Verdana"> Total elevation Gain: {2} </p>
+                <p style="font-family: Verdana"> Average Speed: {3} </p>
+                <img src="data:image/png;base64,{4}" />
 
-            <br>
-            {4}
-            '''.format(segment_name,str(np.round(segment['distance'][-1]/1000,2))+' km', str(np.round(segment['elevation-up'], 1)) +' m', str(np.round(np.mean(segment['Velocity / km/h']), 1)) + ' km/h', chart_html)
+                <br>
+                {4}
+                '''.format(segment_name,str(np.round(segment['distance'][-1]/1000,2))+' km', str(np.round(segment['elevation-up'], 1)) +' m', str(np.round(np.mean(segment['Velocity / km/h']), 1)) + ' km/h', chart_html)
 
-    iframe = folium.IFrame(html=html, width=500, height=500)
-    popup = folium.Popup(iframe, width=500, height=500)
+        iframe = folium.IFrame(html=html, width=500, height=500)
+        popup = folium.Popup(iframe, width=500, height=500)
 
-    folium.TileLayer(tile).add_to(the_map)
+        folium.TileLayer(tile).add_to(the_map)
 
-    marker = folium.Marker(
-        location=segment['latlon'][idx],
-        popup=popup,
-        icon=folium.Icon(icon='star'),
-    )
-    marker.add_to(the_map)
+        marker = folium.Marker(
+            location=segment['latlon'][int(np.round(len(segment['latlon'])/2))],
+            popup=popup,
+            icon=DivIcon(
+            icon_size=(150,36),
+            icon_anchor=(0,0),
+            html='<div style="font-size: 18pt">{}</div>'.format(str(track['name'])[2:-2])),
+        )
+        marker.add_to(the_map)
 
+        
 def get_trip_statistics(files):
 
     # define metrics to expose
