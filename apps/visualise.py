@@ -200,8 +200,8 @@ def app():
 
                         # Pass the file contents through the visualise_gpx() function
                         visualise_gpx(folium_map,'data/day_1.gpx') ## need to work out how to use downloaded file on ui...
-                show_map = st_folium(folium_map, width=800, height=400)
-                        
+                show_map = folium_static(folium_map, width=800, height=400)
+                 
                       
         with col3:
             # Add a button to download a PDF of the map
