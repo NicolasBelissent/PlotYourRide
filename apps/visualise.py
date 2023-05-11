@@ -12,7 +12,6 @@ import altair as alt
 import json
 import folium
 from gpxplotter import create_folium_map, read_gpx_file, add_segment_to_map
-import gpxplotter
 import numpy as np
 from altair_saver import save
 import pandas as pd
@@ -22,6 +21,7 @@ from selenium.webdriver.chrome.options import Options
 import time
 import gpxpy
 import os
+from tempfile import NamedTemporaryFile
 
 line_options = {'weight': 8}
 
@@ -181,8 +181,9 @@ def app():
             st.download_button(
             label="Download Combined GPX File",
             data=combined_file,
-            file_name="combined.gpx",
-            mime="application/gpx+xml")
+            file_name="combined_arthur.gpx",
+            mime="application/gpx+xml"
+            )
 
         with col2:
             # Add the other two buttons to the row
@@ -190,16 +191,17 @@ def app():
                 folium_map = create_folium_map()
                 # Loop through each uploaded file and visualize it
 
-                for gpx_file in gpx_files:
+                for gpx_file in uploaded_files:
                     if gpx_file is not None:
-                        
+                        with open(os.path.join(".",gpx_file.name),"wb") as fuck: 
+                            fuck.write(gpx_file.getbuffer())
+
                         # Read the contents of the file
-                        gpx_data = read_gpx_file(gpx_file)
-                        st.code(gpx_data)
-                        st.code(type(gpx_data))
+                        #st.code(gpx_file.name)
+                        #st.code(type(gpx_data))
 
                         # Pass the file contents through the visualise_gpx() function
-                        visualise_gpx(folium_map,'data/day_1.gpx') ## need to work out how to use downloaded file on ui...
+                        visualise_gpx(folium_map,  fuck.name) ## need to work out how to use downloaded file on ui...
                 show_map = folium_static(folium_map, width=800, height=400)
                  
                       
