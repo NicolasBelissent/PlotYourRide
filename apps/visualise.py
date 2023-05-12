@@ -22,6 +22,7 @@ import time
 import gpxpy
 import os
 from tempfile import NamedTemporaryFile
+import shutil
 
 line_options = {'weight': 8}
 
@@ -193,18 +194,15 @@ def app():
 
                 for gpx_file in uploaded_files:
                     if gpx_file is not None:
-                        #with open(os.path.join(".",gpx_file.name),"wb") as fuck: 
+                    
                         fuck = NamedTemporaryFile(mode='w+b', dir='./user_temp_files/', delete = False, suffix='.gpx')
                         fuck.write(gpx_file.getbuffer())
-                        
-
-                        # Read the contents of the file
-                        #st.code(gpx_file.name)
-                        #st.code(type(gpx_data))
 
                         # Pass the file contents through the visualise_gpx() function
                         visualise_gpx(folium_map,  fuck.name) ## need to work out how to use downloaded file on ui...
+
                 show_map = folium_static(folium_map, width=800, height=400)
+                
                  
                       
         with col3:
