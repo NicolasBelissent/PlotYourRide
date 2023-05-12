@@ -193,8 +193,10 @@ def app():
 
                 for gpx_file in uploaded_files:
                     if gpx_file is not None:
-                        with open(os.path.join(".",gpx_file.name),"wb") as fuck: 
-                            fuck.write(gpx_file.getbuffer())
+                        #with open(os.path.join(".",gpx_file.name),"wb") as fuck: 
+                        fuck = NamedTemporaryFile(mode='w+b', dir='./user_temp_files/', delete = False, suffix='.gpx')
+                        fuck.write(gpx_file.getbuffer())
+                        
 
                         # Read the contents of the file
                         #st.code(gpx_file.name)
