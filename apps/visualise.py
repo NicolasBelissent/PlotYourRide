@@ -141,25 +141,30 @@ def visualise_gpx(the_map, filename, segment_name = 'Bike Ride', tile = 'stament
 
 
 
-def get_trip_statistics(files):
+def get_trip_statistics(uploaded_files):
 
     # define metrics to expose
     total_distance = 0
     total_elevation = 0
     average_speed = 0
-    num_days = len(files)
-    for file in files:
-        for track in read_gpx_file(file):
-            segment = track['segments'][0] # this assumes that there is only one segment
-            total_distance += segment['distance'][-1]/1000
-            total_elevation += segment['elevation-up']
-            average_speed += np.mean(segment['Velocity / km/h'])
+    num_days = len(uploaded_files)
+    for gpx_file in uploaded_files:
+        if gpx_file is not None:
+                    
+            fuck = NamedTemporaryFile(mode='w+b', dir='./user_temp_files/', delete = False, suffix='.gpx')
+            fuck.write(gpx_file.getbuffer())
 
-    metrics_dict = {
-        'Total Distance (km)':np.round(total_distance,2),
-        'Total Elevation (m)':np.round(total_elevation,1),
-        'Average Speed (km/h)':np.round(average_speed/num_days,1)}
-    return metrics_dict
+            for track in read_gpx_file(fuck.name):
+                segment = track['segments'][0] # this assumes that there is only one segment
+                total_distance += segment['distance'][-1]/1000
+                total_elevation += segment['elevation-up']
+                average_speed += np.mean(segment['Velocity / km/h'])
+
+                metrics_dict = {
+                    'Total Distance (km)':np.round(total_distance,2),
+                    'Total Elevation (m)':np.round(total_elevation,1),
+                    'Average Speed (km/h)':np.round(average_speed/num_days,1)}
+                return metrics_dict
 
 
 # Create a Streamlit app that allows the user to upload GPX files and download the combined file
@@ -208,7 +213,7 @@ def app():
         with col3:
             # Add a button to download a PDF of the map
             if st.button("Get Trip Statistics"):                
-                get_trip_statistics(gpx_files)
+                st.write(get_trip_statistics(uploaded_files))
 
         with col4:
 
